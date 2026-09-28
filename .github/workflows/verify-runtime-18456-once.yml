@@ -1,4 +1,4 @@
-name: Verify Websquare runtime 18456 once
+name: Verify Websquare public front 18456 once
 
 on:
   push:
@@ -12,16 +12,23 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
-      - name: Verify Websquare externally
+      - name: Verify public front and runtime externally
         shell: bash
         run: |
           set -Eeuo pipefail
+          ok=0
+          for i in $(seq 1 30); do
+            curl -fsS --max-time 20 "https://websquare.suaveforge.com/deploy.json?verify=$GITHUB_RUN_ID-$i" >/tmp/d.json || true
+            if grep -Fq 'websquare-runtime.suaveforge.com:18456/' /tmp/d.json 2>/dev/null; then ok=1; break; fi
+            sleep 3
+          done
+          test "$ok" = 1
           curl -fsS --max-time 20 https://api-websquare.suaveforge.com:18456/api/health >/tmp/h.json
           grep -Fq '"status":"UP"' /tmp/h.json
           code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 https://websquare-runtime.suaveforge.com:18456/api/health || true)
           test "$code" = 404
           curl -fsS --max-time 20 https://websquare-runtime.suaveforge.com:18456/_wpack_/ui/main/main.js >/tmp/w.js
           test $(wc -c </tmp/w.js) -gt 0
-          echo WEBSQUARE_EXTERNAL_18456=PASS
+          echo WEBSQUARE_PUBLIC_FRONT_18456=PASS
