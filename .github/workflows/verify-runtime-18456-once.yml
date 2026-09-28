@@ -1,0 +1,27 @@
+name: Verify Websquare runtime 18456 once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-runtime-18456-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Verify Websquare externally
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          curl -fsS --max-time 20 https://api-websquare.suaveforge.com:18456/api/health >/tmp/h.json
+          grep -Fq '"status":"UP"' /tmp/h.json
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 https://websquare-runtime.suaveforge.com:18456/api/health || true)
+          test "$code" = 404
+          curl -fsS --max-time 20 https://websquare-runtime.suaveforge.com:18456/_wpack_/ui/main/main.js >/tmp/w.js
+          test $(wc -c </tmp/w.js) -gt 0
+          echo WEBSQUARE_EXTERNAL_18456=PASS
