@@ -3,7 +3,7 @@
   "build": "30",
   "front": "https://websquare.suaveforge.com",
   "runtimeHost": "websquare-runtime.suaveforge.com",
-  "runtimeUrl": "https://websquare-runtime.suaveforge.com:18455/websquare/websquare.html?w2xPath=/ui/main/main.xml",
+  "runtimeUrl": "https://websquare-runtime.suaveforge.com:18456/websquare/websquare.html?w2xPath=/ui/main/main.xml",
   "architecture": "https-front-shell+separate-websquare-runtime+api",
   "runtimeHandshake": "postMessage"
 }
